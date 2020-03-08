@@ -1,0 +1,9 @@
+{
+    "slack_emoji_alias_prefix": "prefix-",
+    "slack_emoji_alias_suffix": "-suffix",
+    "slack_emoji_alias_taken_prefix": "my-",
+    "slack_emoji_alias_taken_suffix": "-2",
+    "slack_emoji_cookie": "b=abc; d=def; lc=1235235123; utm=ghi; d-s=1235235123; x=jkl",
+    "slack_emoji_directory": "/A/Path/To/Emojis/Directory",
+    "slack_team_name": "myslackteam"
+}
