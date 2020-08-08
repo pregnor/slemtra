@@ -1,34 +1,41 @@
 name: CI
+
 on:
   push:
+    # branches: [ master ]
+  # pull_request:
+  #   branches: [ master ]
+
 jobs:
   ci:
-    strategy:
-      matrix:
-        go-version: [1.14.x]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      - name: Checking code out
+        uses: actions/checkout@v2
 
-    - name: Installing Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: ${{ matrix.go-version }}
+      - name: Installing Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
 
-    - name: Installing golangci-lint
-      run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.27.0
+      - name: Installing golangci-lint
+        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.3ö.0
 
-    - name: Installing go-mod-outdated
-      run: go get -u github.com/psampaz/go-mod-outdated
+      - name: Installing go-mod-outdated
+        run: go get -u github.com/psampaz/go-mod-outdated
 
-    - name: Checking dependencies
-      run: make check-dependencies
+      - name: Checking dependencies
+        run: make check-dependencies
 
-    - name: Analyzing code
-      run: make analyze
+      - name: Analyzing code
+        run: make analyze
 
-    - name: Building libraries and binaries
-      run: make build
+      - name: Building libraries and binaries
+        run: make build
 
-    - name: Testing libraries and binaries
-      run: make test
+      - name: Testing libraries and binaries
+        run: make test
+
+    strategy:
+      matrix:
+        go-version: [1.13.x, 1.14.x]
