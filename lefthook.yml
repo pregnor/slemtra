@@ -1,0 +1,121 @@
+commit-msg:
+
+  commands:
+
+    multiple-sign-off:
+      run: "commit_message=$(cat ./.git/COMMIT_EDITMSG)
+      ; sign_off_count=$(grep -c '^Signed-off-by: ' <<< \"${commit_message}\")
+      ; test ${sign_off_count} -lt 2
+      || (
+        printf >&2 \"multiple sign offs in commit message, commit message:\n%s\n\" \"${commit_message}\"
+        && exit 1
+      )"
+      tags: git author
+
+    format: # https://regex101.com/r/oYWD3C/1
+      run: "commit_short_message=$(head -n 1 ./.git/COMMIT_EDITMSG)
+      ; commit_short_message_format=\"^(fixup! |squash! )?(BREAKING CHANGE|build|chore|ci|docs|feat|fix|merge|perf|refactor|revert|style|test|WIP)(\\([^:\\(\\)]+\\))?(: )(.+)$\"
+      ; grep -E -q \"${commit_short_message_format}\" <<< \"${commit_short_message}\"
+      || (
+        printf >&2 \"invalid commit short message format, format: '%s', short message: '%s'\n\" \"${commit_short_message_format}\" \"${commit_short_message}\"
+        && exit 1
+      )"
+      tags: git style
+
+    trailing-dot:
+      run: "commit_short_message=$(head -n 1 ./.git/COMMIT_EDITMSG)
+      ; commit_short_message_last_character=$(tail -c 2 <<< ${commit_short_message} | head -c 1)
+      ; test \"${commit_short_message_last_character}\" != \".\"
+      || (
+        printf >&2 \"trailing dot in commit short message\n\"
+        && exit 1
+      )"
+      tags: git style
+
+  parallel: true
+
+pre-commit:
+
+  commands:
+
+    ascii-file-names:
+      files: git diff --cached --name-only --diff-filter=A -z | tr \"\\0\" \"\\n\"
+      run: "test ! $(git config --type=bool hooks.allownonascii)
+        || exit 0
+      ; non_ascii_file_names=$(LC_ALL=C grep '[^ -~]' <<< \"{files}\")
+      ; non_ascii_file_count=$(grep -c \".+\" <<< \"${non_ascii_file_names}\")
+      ; test \"${non_ascii_file_count}\" -eq 0
+      || (
+        printf >&2 \"invalid non-ascii file names, count: '%d', file names:'%s'\n\" \"${non_ascii_file_count}\" \"${non_ascii_file_names}\"
+        && exit 1
+      )"
+      tags: meta file
+
+    golangci-lint:
+      files: 'git diff --cached --diff-filter=ABMTUX --name-only'
+      glob: "*.go"
+      run: "xargs -n 1 golangci-lint run <<< {files}"
+      tags: golang lint
+
+    go-install:
+      run: "go install ./..."
+      tags: golang compilation
+
+    go-test:
+      run: "go test -count 1 -cover -race -run \".*\" -timeout 10s ./..."
+      tags: golang test
+
+    go-mod-outdated:
+      run: "go list -u -m -mod=readonly -json all
+      | go-mod-outdated -ci -direct -update"
+      tags: golang dependency
+
+  parallel: true
+
+pre-push:
+
+  commands:
+
+    autorebase:
+      run: "local_hash=$(git rev-parse HEAD)
+      ; remote_name=$(git remote show | head -n 1)
+      ; remote_head_branch=$(git symbolic-ref refs/remotes/${remote_name}/HEAD | sed -E 's/refs\\/remotes\\/${remote_name}\\/(.*)/\\1/g')
+      ; remote_hash=$(git rev-parse @{upstream})
+        || remote_hash=$(git rev-parse ${remote_head_branch}@{upstream})
+      ; commit_range=\"${remote_hash}..${local_hash}\"
+      ; autorebase_format=\"^(fixup! |squash! )\"
+      ; exit_code=0
+      ; for commit_hash in $(git rev-list \"${commit_range}\"); do
+        commit_short_message=$(git log -n 1 --pretty='format:%s' \"${commit_hash}\") ;
+        grep -E -q -v \"${autorebase_format}\" <<< \"${commit_short_message}\"
+          && continue ;
+        exit_code=1 ;
+        printf >&2 \"autorebase commit left in push, commit short message: '%s'\n\" \"${commit_short_message}\" ;
+      done
+      ; exit ${exit_code}"
+      tags: git style
+
+    format: # https://regex101.com/r/oYWD3C/1
+      run: "local_hash=$(git rev-parse HEAD)
+      ; remote_name=$(git remote show | head -n 1)
+      ; remote_head_branch=$(git symbolic-ref refs/remotes/${remote_name}/HEAD | sed -E 's/refs\\/remotes\\/${remote_name}\\/(.*)/\\1/g')
+      ; remote_hash=$(git rev-parse @{upstream})
+        || remote_hash=$(git rev-parse ${remote_head_branch}@{upstream})
+      ; commit_range=\"${remote_hash}..${local_hash}\"
+      ; commit_short_message_format=\"^(fixup! |squash! )?(BREAKING CHANGE|build|chore|ci|docs|feat|fix|merge|perf|refactor|revert|style|test|WIP)(\\([^:\\(\\)]+\\))?(: )(.+)$\"
+      ; exit_code=0
+      ; for commit_hash in $(git rev-list \"${commit_range}\"); do
+        commit_short_message=$(git log -n 1 --pretty='format:%s' \"${commit_hash}\") ;
+        grep -E -q \"${commit_short_message_format}\" <<< \"${commit_short_message}\"
+          && continue ;
+        exit_code=1 ;
+        printf >&2 \"invalid commit short message format, format: '%s', short message: '%s'\n\" \"${commit_short_message_format}\" \"${commit_short_message}\" ;
+      done
+      ; exit ${exit_code}"
+      tags: git style
+
+  parallel: true
+
+skip_output:
+  - meta #(version and which hook running)
+  - success #(output from runners with exit code 0)
