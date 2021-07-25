@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 	upload "github.com/pregnor/slack-emoji-upload"
@@ -32,4 +34,15 @@ func main() {
 
 	err = slackClient.PostEmojis(configuration.SlackEmojiDirectory, configuration.SlackEmojiAliasPrefix, configuration.SlackEmojiAliasSuffix, configuration.SlackEmojiAliasTakenPrefix, configuration.SlackEmojiAliasTakenSuffix)
 	handleFatalError(err != nil, 3, errors.Wrapf(err, "posting emojis failed, directory: '%+v', prefix: '%+v', suffix: '%+v'", configuration.SlackEmojiDirectory, configuration.SlackEmojiAliasPrefix, configuration.SlackEmojiAliasSuffix))
+}
+
+// newEmojiNameFromFilePath returns the prefixed and suffixed name and taken name from the
+// emoji's file path.
+func newEmojiNameFromFilePath(path, prefix, suffix, takenPrefix, takenSuffix string) (name, takenName string) {
+	fileName := filepath.Base(path)
+	baseName := strings.TrimSuffix(fileName, filepath.Ext(fileName))
+	sanitizedName := strings.Replace(baseName, ":", "", -1) // Note: for some reason on macOS path of /73.jpg is read as :73.jpg. : is not permitted anyway, because it denotes emoji open/close tags.
+	name = prefix + sanitizedName + suffix
+
+	return name, takenPrefix + name + takenSuffix
 }

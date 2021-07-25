@@ -3,6 +3,10 @@ github.com/cenkalti/backoff/v4 v4.0.0 h1:6VeaLF9aI+MAUQ95106HwWzYZgJJpZ4stumjj6R
 github.com/cenkalti/backoff/v4 v4.0.0/go.mod h1:eEew/i+1Q6OrCDZh3WiXYv3+nJwBASZ8Bog/87DQnVg=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
+github.com/pregnor/slack-emoji-upload v0.0.0-20200801083402-ce8b31d19afa h1:6mBD9YHd6h0UC1xzX2Tnxxea6jF/emR4K5OyyockWc8=
+github.com/pregnor/slack-emoji-upload v0.0.0-20200801083402-ce8b31d19afa/go.mod h1:YUVMSsMCKPhvz88zNix69U/uZzod+cXluL8c6NIeLr0=
+github.com/pregnor/slemtra v0.0.0-20200801083402-ce8b31d19afa h1:6mBD9YHd6h0UC1xzX2Tnxxea6jF/emR4K5OyyockWc8=
+github.com/pregnor/slemtra v0.0.0-20200801083402-ce8b31d19afa h1:HQ6LaXkWEMWpfaaPUbW51RlJa1Y2WWw04w5QjgnHmbY=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/net v0.0.0-20181220203305-927f97764cc3/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/net v0.0.0-20200301022130-244492dfa37a h1:GuSPYbZzB5/dcLNCwLQLsg3obCJtX9IJhpXkvY7kzk0=

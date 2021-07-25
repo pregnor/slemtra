@@ -1,2 +1,4 @@
-# slack-emoji-upload
-Tool to upload Slack emojis in bulk
+# slemtra
+
+Slemtra is a tool to work with emojis in a Slack workspace including
+listing, uploading, downloading, renaming, aliasing.
